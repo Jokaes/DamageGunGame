@@ -23,7 +23,7 @@ settings {
             "enableKillFeed": false,
             "enableRandomHeroes": true,
             "respawnTime%": 0,
-            "scoreToWin": 200
+            "scoreToWin": 50
         }
     },
     "heroes": {
@@ -151,7 +151,7 @@ rule "Leaderboard TEAM DEATHMATCH {Global}":
     hudSubtext(getAllPlayers(), "team of {0}: {1}".format(sorted(getPlayers(Color.TEAM_1), lambda player: player.damageHealDone).last(), round(damageHealDoneTeam1)), HudPosition.RIGHT, -999 + damageHealDoneTeam2 / 1000, Color.PURPLE, HudReeval.VISIBILITY_SORT_ORDER_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "team of {0}: {1}".format(sorted(getPlayers(Color.TEAM_2), lambda player: player.damageHealDone).last(), round(damageHealDoneTeam2)), HudPosition.RIGHT, -999 + damageHealDoneTeam1 / 1000, Color.PURPLE, HudReeval.VISIBILITY_SORT_ORDER_AND_STRING, SpecVisibility.DEFAULT)
 
-
+/*
 rule "Hero List - Infinite 14 DPS + 7 Tank + 7 Supp {Random order}":
     @Event eachPlayer
     
@@ -164,19 +164,6 @@ rule "Hero List - Infinite 14 DPS + 7 Tank + 7 Supp {Random order}":
     eventPlayer.heroList = eventPlayer.heroList.slice(0, 28)
     eventPlayer.heroList = random.shuffle(eventPlayer.heroList)
     teamsHeroList = true
-
-
-/*
-rule "Hero List - Infinite 8 DPS + 1 Tank (5th) + 1 Supp (10th)":
-    @Event eachPlayer
-    
-    eventPlayer.heroList = getDamageHeroes()
-    eventPlayer.heroList = random.shuffle(eventPlayer.heroList)
-    eventPlayer.heroList = eventPlayer.heroList.slice(0, 9)
-    eventPlayer.heroList[4] = random.choice(getTankHeroes())
-    eventPlayer.heroList.append(random.choice(getSupportHeroes()))
-    classicHeroList = true
-*/
 
 rule "Preload Heroes":
     @Event eachPlayer
@@ -192,12 +179,70 @@ rule "INFINITO ∞":
     if teamsHeroList == true:
         eventPlayer.heroListInfinitoAppend = []
         eventPlayer.heroListInfinitoAppend.append(getDamageHeroes())
-        eventPlayer.heroListInfinitoAppend = eventPlayer.heroList.slice(0, 14)
+        eventPlayer.heroListInfinitoAppend = eventPlayer.heroListInfinitoAppend.slice(0, 14)
         eventPlayer.heroListInfinitoAppend.append(getTankHeroes())
-        eventPlayer.heroListInfinitoAppend = eventPlayer.heroList.slice(0, 21)
+        eventPlayer.heroListInfinitoAppend = eventPlayer.heroListInfinitoAppend.slice(0, 21)
         eventPlayer.heroListInfinitoAppend.append(getSupportHeroes())
-        eventPlayer.heroListInfinitoAppend = eventPlayer.heroList.slice(0, 28)
-        eventPlayer.heroListInfinitoAppend = random.shuffle(eventPlayer.heroList)
+        eventPlayer.heroListInfinitoAppend = eventPlayer.heroListInfinitoAppend.slice(0, 28)
+        eventPlayer.heroListInfinitoAppend = random.shuffle(eventPlayer.heroListInfinitoAppend)
+        eventPlayer.heroList.append(eventPlayer.heroListInfinitoAppend)
+    if classicHeroList == true:
+        eventPlayer.heroList.append(random.choice(getDamageHeroes()))
+        wait(0.25)
+        eventPlayer.heroList.append(random.choice(getDamageHeroes()))
+        wait(0.25)
+        eventPlayer.heroList.append(random.choice(getDamageHeroes()))
+        wait(0.25)
+        eventPlayer.heroList.append(random.choice(getDamageHeroes()))
+        wait(0.25)
+        eventPlayer.heroList.append(random.choice(getTankHeroes()))
+        wait(0.25)
+        eventPlayer.heroList.append(random.choice(getDamageHeroes()))
+        wait(0.25)
+        eventPlayer.heroList.append(random.choice(getDamageHeroes()))
+        wait(0.25)
+        eventPlayer.heroList.append(random.choice(getDamageHeroes()))
+        wait(0.25)
+        eventPlayer.heroList.append(random.choice(getDamageHeroes()))
+        wait(0.25)
+        eventPlayer.heroList.append(random.choice(getSupportHeroes()))
+*/
+
+rule "Hero List - Infinite 14 DPS + 7 Tank + 7 Supp {Random order}":
+    @Event eachPlayer
+    
+    eventPlayer.heroList = []
+    eventPlayer.heroList.append(random.shuffle(getDamageHeroes()))
+    eventPlayer.heroList = eventPlayer.heroList.slice(0, 3)
+    eventPlayer.heroList.append(random.shuffle(getTankHeroes()))
+    eventPlayer.heroList = eventPlayer.heroList.slice(0, 4)
+    eventPlayer.heroList.append(random.shuffle(getSupportHeroes()))
+    eventPlayer.heroList = eventPlayer.heroList.slice(0, 5)
+    eventPlayer.heroList = random.shuffle(eventPlayer.heroList)
+    teamsHeroList = true
+
+rule "Preload Heroes":
+    @Event eachPlayer
+    
+    eventPlayer.preloadHero(eventPlayer.heroList)
+
+
+rule "INFINITO ∞":
+    @Event eachPlayer
+    @Condition eventPlayer.hasSpawned() == true
+    @Condition eventPlayer.nextObjective % (len(eventPlayer.heroList)*1000) == 0
+    @Condition len(eventPlayer.heroList) != 0
+    @Condition isGameInProgress()
+    
+    if teamsHeroList == true:
+        eventPlayer.heroListInfinitoAppend = []
+        eventPlayer.heroListInfinitoAppend.append(random.shuffle(getDamageHeroes()))
+        eventPlayer.heroListInfinitoAppend = eventPlayer.heroListInfinitoAppend.slice(0, 14)
+        eventPlayer.heroListInfinitoAppend.append(random.shuffle(getTankHeroes()))
+        eventPlayer.heroListInfinitoAppend = eventPlayer.heroListInfinitoAppend.slice(0, 21)
+        eventPlayer.heroListInfinitoAppend.append(random.shuffle(getSupportHeroes()))
+        eventPlayer.heroListInfinitoAppend = eventPlayer.heroListInfinitoAppend.slice(0, 28)
+        eventPlayer.heroListInfinitoAppend = random.shuffle(eventPlayer.heroListInfinitoAppend)
         eventPlayer.heroList.append(eventPlayer.heroListInfinitoAppend)
     if classicHeroList == true:
         eventPlayer.heroList.append(random.choice(getDamageHeroes()))
@@ -322,29 +367,23 @@ rule "Score Debug (TEST)":
     wait(0.25)
 
 
-/*
+
 rule "Dummy Summon (TEST)":
     @Event eachPlayer
     @Condition eventPlayer.isCommunicating(Comms.HELLO) == true
     
-    createDummy(eventPlayer.heroList[0], Team.ALL, -1, eventPlayer.getPosition(), vect(0, 0, 0))
-    #createDummy(eventPlayer.heroList[0], Team.ALL, -1, eventPlayer.getPosition(), vect(0, 0, 0))
-    #createDummy(eventPlayer.heroList[0], Team.ALL, -1, eventPlayer.getPosition(), vect(0, 0, 0))
-    #createDummy(eventPlayer.heroList[0], Team.ALL, -1, eventPlayer.getPosition(), vect(0, 0, 0))
-    #createDummy(eventPlayer.heroList[0], Team.ALL, -1, eventPlayer.getPosition(), vect(0, 0, 0))
-    #createDummy(eventPlayer.heroList[0], Team.ALL, -1, eventPlayer.getPosition(), vect(0, 0, 0))
-*/
+    createDummy(eventPlayer.heroList[0], Team.1, -1, eventPlayer.getPosition(), vect(0, 0, 0))
+    createDummy(eventPlayer.heroList[0], Team.2, -1, eventPlayer.getPosition(), vect(0, 0, 0))
 
-/*
+
+
 rule "Dummy Aim Bot (TEST)":
     @Event eachPlayer
     @Condition eventPlayer.isDummy() == true
     
     eventPlayer.startFacing(directionTowards(eventPlayer, getClosestPlayer(eventPlayer, getOppositeTeam(eventPlayer.getTeam()))), 10000, Relativity.TO_WORLD, FacingReeval.DIRECTION_AND_TURN_RATE)
     eventPlayer.startForcingButton(Button.PRIMARY_FIRE)
-    eventPlayer.heroList.remove(Hero.HANZO)
-    eventPlayer.heroList.remove(Hero.ASHE)
-*/
+
 
 /*
 rule "Dummy Ult (TEST)":

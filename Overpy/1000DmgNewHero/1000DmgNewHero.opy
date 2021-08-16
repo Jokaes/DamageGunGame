@@ -1,6 +1,6 @@
 settings {
     "main": {
-        "description": "1000 DMG NEW HERO v11.1.0\r\nChange hero every 1000 damage.\r\nCreated by Jokaes#2263\r\nJoin my discord.io/Jokaes\r\nCode: NX45F",
+        "description": "1000 DMG NEW HERO v12.0.0\r\nChange hero every 1000 damage.\r\nCreated by Jokaes#2263\r\nJoin my discord.io/Jokaes\r\nCode: NX45F",
         "modeName": "1000 DMG NEW HERO"
     },
     "lobby": {
@@ -47,23 +47,25 @@ settings {
 
 #Global variables
 
-globalvar timeCounter 0
-globalvar leaderboardArray 1
-globalvar arenaMap1 2
-globalvar arenaMap2 3
-globalvar arenaMap3 4
-globalvar arenaMap4 5
+globalvar timeCounter
+globalvar leaderboardArray
+globalvar arenaMap1
+globalvar arenaMap2
+globalvar arenaMap3
+globalvar arenaMap4
+globalvar heroListType
 
 
 #Player variables
 
-playervar damageDone 0
-playervar heroList 1
-playervar nextObjective 2
-playervar heroIcon 3
-playervar damageDisplay 5
-playervar damageDisplayPos 6
-playervar damageDisplayScale 7
+playervar damageDone
+playervar heroList
+playervar nextObjective
+playervar heroIcon
+playervar damageDisplay
+playervar damageDisplayPos
+playervar damageDisplayScale
+playervar heroListInfinitoAppend
 
 
 #Subroutine names
@@ -78,12 +80,14 @@ rule "Disable bulit-in game mode & start timer variables {Game in progress GLOBA
     disableGamemodeCompletion()
     disableAnnouncer()
     disableMusic()
-    disableInspector()
+    #disableInspector()
     pauseMatchTime()
     timeCounter = 0.001
     #Creates a HUD in the top with [svr load: {0} | svr avg: {1} | svr peak: {2}]
     hudSubheader([i for i in hostPlayer if "#Jokaes" == l"#{0}".format(hostPlayer)], "svr load: {0} | svr avg: {1} | svr peak: {2}".format(getServerLoad(), getAverageServerLoad(), getPeakServerLoad()), HudPosition.TOP, -100, Color.LIME_GREEN, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
 
+rule "Workshop Settings":
+    heroListType = createWorkshopSetting(enum["80% DPS, 10% SUPPORT, 10% TANKS", "50% DPS, 25% SUPPORT, 25% TANKS", "100% DPS", "ALL HEROES"], "Settings", "Hero List [80% DPS, 10% SUPPORT, 10% TANKS]", 0, 0)
 
 rule "Gamemode description, create objective, next hero HUDs {Game in progress PLAYER}":
     @Event eachPlayer
@@ -123,77 +127,99 @@ rule "Damage track":
         lbl_2:
     eventPlayer.damageDisplay = getLastCreatedText()
 
-
-/*
-rule "Leaderboard {Reevaluation}":
-    leaderboardArray = sorted(getAllPlayers(), lambda player: player.damageDone)
-    wait(1)
-    goto RULE_START
-*/
-
-/*
-rule "Leaderboard {HUD}":
-    hudSubtext([player for player in getAllPlayers() if leaderboardArray[0] != null], l"{0} : {1} : {2}".format(heroIcon(leaderboardArray[0].getCurrentHero()), leaderboardArray[0], round(leaderboardArray[0].damageDone)), HudPosition.RIGHT, 11, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext([player for player in getAllPlayers() if leaderboardArray[1] != null], l"{0} : {1} : {2}".format(heroIcon(leaderboardArray[1].getCurrentHero()), leaderboardArray[1], round(leaderboardArray[1].damageDone)), HudPosition.RIGHT, 10, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext([player for player in getAllPlayers() if leaderboardArray[2] != null], l"{0} : {1} : {2}".format(heroIcon(leaderboardArray[2].getCurrentHero()), leaderboardArray[2], round(leaderboardArray[2].damageDone)), HudPosition.RIGHT, 9, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext([player for player in getAllPlayers() if leaderboardArray[3] != null], l"{0} : {1} : {2}".format(heroIcon(leaderboardArray[3].getCurrentHero()), leaderboardArray[3], round(leaderboardArray[3].damageDone)), HudPosition.RIGHT, 8, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext([player for player in getAllPlayers() if leaderboardArray[4] != null], l"{0} : {1} : {2}".format(heroIcon(leaderboardArray[4].getCurrentHero()), leaderboardArray[4], round(leaderboardArray[4].damageDone)), HudPosition.RIGHT, 7, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext([player for player in getAllPlayers() if leaderboardArray[5] != null], l"{0} : {1} : {2}".format(heroIcon(leaderboardArray[5].getCurrentHero()), leaderboardArray[5], round(leaderboardArray[5].damageDone)), HudPosition.RIGHT, 6, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext([player for player in getAllPlayers() if leaderboardArray[6] != null], l"{0} : {1} : {2}".format(heroIcon(leaderboardArray[6].getCurrentHero()), leaderboardArray[6], round(leaderboardArray[6].damageDone)), HudPosition.RIGHT, 5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext([player for player in getAllPlayers() if leaderboardArray[7] != null], l"{0} : {1} : {2}".format(heroIcon(leaderboardArray[7].getCurrentHero()), leaderboardArray[7], round(leaderboardArray[7].damageDone)), HudPosition.RIGHT, 4, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext([player for player in getAllPlayers() if leaderboardArray[8] != null], l"{0} : {1} : {2}".format(heroIcon(leaderboardArray[8].getCurrentHero()), leaderboardArray[8], round(leaderboardArray[8].damageDone)), HudPosition.RIGHT, 3, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext([player for player in getAllPlayers() if leaderboardArray[9] != null], l"{0} : {1} : {2}".format(heroIcon(leaderboardArray[9].getCurrentHero()), leaderboardArray[9], round(leaderboardArray[9].damageDone)), HudPosition.RIGHT, 2, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext([player for player in getAllPlayers() if leaderboardArray[10] != null], l"{0} : {1} : {2}".format(heroIcon(leaderboardArray[10].getCurrentHero()), leaderboardArray[10], round(leaderboardArray[10].damageDone)), HudPosition.RIGHT, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext([player for player in getAllPlayers() if leaderboardArray[11] != null], l"{0} : {1} : {2}".format(heroIcon(leaderboardArray[11].getCurrentHero()), leaderboardArray[11], round(leaderboardArray[11].damageDone)), HudPosition.RIGHT, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-*/
-
-rule "Leaderboard 11.1.0":
+rule "Leaderboard 12.0.0":
     @Event eachPlayer
     
     hudSubtext(getAllPlayers(), "{0} : {1} : {2}".format(heroIcon(eventPlayer.getCurrentHero()), eventPlayer, round(eventPlayer.damageDone)), HudPosition.RIGHT, eventPlayer.damageDone * -1 / 1000, Color.WHITE, HudReeval.VISIBILITY_SORT_ORDER_AND_STRING, SpecVisibility.ALWAYS)
 
-
-rule "Hero List - Infinite 8 DPS + 1 Tank (5th) + 1 Supp (10th)":
+rule "80% DPS, 10% SUPPORT, 10% TANKS":
     @Event eachPlayer
+    @Condition heroListType == 0
     
-    eventPlayer.heroList = getDamageHeroes()
+    eventPlayer.heroList = []
+    eventPlayer.heroList.append(random.shuffle(getDamageHeroes()))
+    eventPlayer.heroList = eventPlayer.heroList.slice(0, 16)
+    eventPlayer.heroList.append(random.shuffle(getTankHeroes()))
+    eventPlayer.heroList = eventPlayer.heroList.slice(0, 18)
+    eventPlayer.heroList.append(random.shuffle(getSupportHeroes()))
+    eventPlayer.heroList = eventPlayer.heroList.slice(0, 20)
     eventPlayer.heroList = random.shuffle(eventPlayer.heroList)
-    eventPlayer.heroList = eventPlayer.heroList.slice(0, 9)
-    eventPlayer.heroList[4] = random.choice(getTankHeroes())
-    eventPlayer.heroList.append(random.choice(getSupportHeroes()))
+    
+rule "50% DPS, 25% SUPPORT, 25% TANKS":
+    @Event eachPlayer
+    @Condition heroListType == 1
+    
+    eventPlayer.heroList = []
+    eventPlayer.heroList.append(random.shuffle(getDamageHeroes()))
+    eventPlayer.heroList = eventPlayer.heroList.slice(0, 14)
+    eventPlayer.heroList.append(random.shuffle(getTankHeroes()))
+    eventPlayer.heroList = eventPlayer.heroList.slice(0, 21)
+    eventPlayer.heroList.append(random.shuffle(getSupportHeroes()))
+    eventPlayer.heroList = eventPlayer.heroList.slice(0, 28)
+    eventPlayer.heroList = random.shuffle(eventPlayer.heroList)
 
+rule "100% DPS":
+    @Event eachPlayer
+    @Condition heroListType == 2
+    
+    eventPlayer.heroList = []
+    eventPlayer.heroList.append(random.shuffle(getDamageHeroes()))
+    eventPlayer.heroList = random.shuffle(eventPlayer.heroList)
+
+rule "ALL HEROES":
+    @Event eachPlayer
+    @Condition heroListType == 3
+    
+    eventPlayer.heroList = []
+    eventPlayer.heroList.append(random.shuffle(getAllHeroes()))
+    eventPlayer.heroList = random.shuffle(eventPlayer.heroList)
 
 rule "Preload Heroes":
     @Event eachPlayer
     
     eventPlayer.preloadHero(eventPlayer.heroList)
 
-
 rule "INFINITO ∞":
     @Event eachPlayer
-    @Condition getSupportHeroes().index(eventPlayer.getCurrentHero()) != -1
     @Condition eventPlayer.hasSpawned() == true
+    @Condition eventPlayer.nextObjective % (len(eventPlayer.heroList)*1000) == 0
+    @Condition len(eventPlayer.heroList) != 0
+    @Condition isGameInProgress()
     
-    eventPlayer.heroList.append(random.choice(getDamageHeroes()))
-    wait(0.25)
-    eventPlayer.heroList.append(random.choice(getDamageHeroes()))
-    wait(0.25)
-    eventPlayer.heroList.append(random.choice(getDamageHeroes()))
-    wait(0.25)
-    eventPlayer.heroList.append(random.choice(getDamageHeroes()))
-    wait(0.25)
-    eventPlayer.heroList.append(random.choice(getTankHeroes()))
-    wait(0.25)
-    eventPlayer.heroList.append(random.choice(getDamageHeroes()))
-    wait(0.25)
-    eventPlayer.heroList.append(random.choice(getDamageHeroes()))
-    wait(0.25)
-    eventPlayer.heroList.append(random.choice(getDamageHeroes()))
-    wait(0.25)
-    eventPlayer.heroList.append(random.choice(getDamageHeroes()))
-    wait(0.25)
-    eventPlayer.heroList.append(random.choice(getSupportHeroes()))
-
+    switch (heroListType):
+        default:
+        case 0:
+            eventPlayer.heroListInfinitoAppend = []
+            eventPlayer.heroListInfinitoAppend.append(random.shuffle(getDamageHeroes()))
+            eventPlayer.heroListInfinitoAppend = eventPlayer.heroListInfinitoAppend.slice(0, 16)
+            eventPlayer.heroListInfinitoAppend.append(random.shuffle(getTankHeroes()))
+            eventPlayer.heroListInfinitoAppend = eventPlayer.heroListInfinitoAppend.slice(0, 18)
+            eventPlayer.heroListInfinitoAppend.append(random.shuffle(getSupportHeroes()))
+            eventPlayer.heroListInfinitoAppend = eventPlayer.heroListInfinitoAppend.slice(0, 20)
+            eventPlayer.heroListInfinitoAppend = random.shuffle(eventPlayer.heroListInfinitoAppend)
+            eventPlayer.heroList.append(eventPlayer.heroListInfinitoAppend)
+            break
+        case 1:
+            eventPlayer.heroListInfinitoAppend = []
+            eventPlayer.heroListInfinitoAppend.append(random.shuffle(getDamageHeroes()))
+            eventPlayer.heroListInfinitoAppend = eventPlayer.heroListInfinitoAppend.slice(0, 14)
+            eventPlayer.heroListInfinitoAppend.append(random.shuffle(getTankHeroes()))
+            eventPlayer.heroListInfinitoAppend = eventPlayer.heroListInfinitoAppend.slice(0, 21)
+            eventPlayer.heroListInfinitoAppend.append(random.shuffle(getSupportHeroes()))
+            eventPlayer.heroListInfinitoAppend = eventPlayer.heroListInfinitoAppend.slice(0, 28)
+            eventPlayer.heroListInfinitoAppend = random.shuffle(eventPlayer.heroListInfinitoAppend)
+            eventPlayer.heroList.append(eventPlayer.heroListInfinitoAppend)
+            break
+        case 2:
+            eventPlayer.heroListInfinitoAppend.append(random.shuffle(getDamageHeroes()))
+            eventPlayer.heroListInfinitoAppend = random.shuffle(eventPlayer.heroListInfinitoAppend)
+            eventPlayer.heroList.append(eventPlayer.heroListInfinitoAppend)
+            break
+        case 3:
+            eventPlayer.heroListInfinitoAppend.append(random.shuffle(getAllHeroes()))
+            eventPlayer.heroListInfinitoAppend = random.shuffle(eventPlayer.heroListInfinitoAppend)
+            eventPlayer.heroList.append(eventPlayer.heroListInfinitoAppend)
+            break
 
 rule "In Setup OR In Game in progress -> Starting Hero -> HeroList[0]":
     @Event eachPlayer
@@ -306,14 +332,14 @@ rule "No entry OOB (spawn tele) -Created by Beemoo":
     eventPlayer.teleport(arenaMap2 + vect(random.randint(-8, 8), 0, random.randint(-19, 19)))
 
 
-rule "Game Mode Description HUD - 1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v11.1.0":
+rule "Game Mode Description HUD - 1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v12.0.0":
     @Condition isGameInProgress() == true
     
     hudSubtext(getAllPlayers(), " ", HudPosition.LEFT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), " ", HudPosition.LEFT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), " ", HudPosition.LEFT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), " ", HudPosition.LEFT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext(getAllPlayers(), "1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v11.1.0", HudPosition.LEFT, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext(getAllPlayers(), "1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v12.0.0", HudPosition.LEFT, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "Change {0} every {1}".format(l"Hero", l"{0} {1}".format(1000, l"Damage")), HudPosition.LEFT, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "8 random DPS + 1 Tank (5th) + 1 Support (10th) in loop", HudPosition.LEFT, 2, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), " ", HudPosition.LEFT, 2.5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
@@ -322,7 +348,7 @@ rule "Game Mode Description HUD - 1000 DMG = NEXT HERO aka ∞ Infinite Damage G
     async(gameModeDescriptionMessages, AsyncBehavior.NOOP)
 
 
-rule "Game Mode Description for players who join - 1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v11.1.0":
+rule "Game Mode Description for players who join - 1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v12.0.0":
     @Event playerJoined
     @Condition isGameInProgress() == true
     
@@ -330,10 +356,10 @@ rule "Game Mode Description for players who join - 1000 DMG = NEXT HERO aka ∞ 
 
 
 def gameModeDescriptionMessages():
-    @Name "Game Mode Description messages - 1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v11.1.0"
+    @Name "Game Mode Description messages - 1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v12.0.0"
     
     wait(3.5)
-    smallMessage(eventPlayer, "1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v11.1.0")
+    smallMessage(eventPlayer, "1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v12.0.0")
     wait(3.5)
     smallMessage(eventPlayer, "Change {0} every {1}".format(l"Hero", l"{0} {1}".format(1000, l"Damage")))
     wait(3.5)
@@ -342,7 +368,7 @@ def gameModeDescriptionMessages():
     smallMessage(eventPlayer, "Created by Jokaes#2263")
 
 
-/*
+
 rule "Score Debug (TEST)":
     @Event eachPlayer
     @Condition eventPlayer.isHoldingButton(Button.INTERACT) == true
@@ -352,9 +378,9 @@ rule "Score Debug (TEST)":
     eventPlayer.nextObjective = (floor(eventPlayer.damageDone / 1000) + 1) * 1000
     eventPlayer.startForcingHero(eventPlayer.heroList[eventPlayer.nextObjective / 1000 - 1])
     wait(0.25)
-*/
 
-/*
+
+
 rule "Dummy Summon (TEST)":
     @Event eachPlayer
     @Condition eventPlayer.isCommunicating(Comms.HELLO) == true
@@ -365,9 +391,9 @@ rule "Dummy Summon (TEST)":
     #createDummy(eventPlayer.heroList[0], Team.ALL, -1, eventPlayer.getPosition(), vect(0, 0, 0))
     #createDummy(eventPlayer.heroList[0], Team.ALL, -1, eventPlayer.getPosition(), vect(0, 0, 0))
     #createDummy(eventPlayer.heroList[0], Team.ALL, -1, eventPlayer.getPosition(), vect(0, 0, 0))
-*/
 
-/*
+
+
 rule "Dummy Aim Bot (TEST)":
     @Event eachPlayer
     @Condition eventPlayer.isDummy() == true
@@ -376,7 +402,7 @@ rule "Dummy Aim Bot (TEST)":
     eventPlayer.startForcingButton(Button.PRIMARY_FIRE)
     eventPlayer.heroList.remove(Hero.HANZO)
     eventPlayer.heroList.remove(Hero.ASHE)
-*/
+
 
 /*
 rule "Dummy Ult (TEST)":
