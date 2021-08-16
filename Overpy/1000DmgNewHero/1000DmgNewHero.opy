@@ -1,6 +1,6 @@
 settings {
     "main": {
-        "description": "1000 DMG NEW HERO v12.0.0\r\nChange hero every 1000 damage.\r\nCreated by Jokaes#2263\r\nJoin my discord.io/Jokaes\r\nCode: NX45F",
+        "description": "1000 DMG NEW HERO v13.0.0\r\nChange hero every 1000 damage.\r\nCreated by Jokaes#2263\r\nJoin my discord.io/Jokaes\r\nCode: NX45F",
         "modeName": "1000 DMG NEW HERO"
     },
     "lobby": {
@@ -55,6 +55,7 @@ globalvar arenaMap3
 globalvar arenaMap4
 globalvar heroListType
 globalvar victoryCondition
+globalvar workshopSettingsStr
 
 
 #Player variables
@@ -68,6 +69,7 @@ playervar damageDisplayPos
 playervar damageDisplayScale
 playervar heroListInfinitoAppend
 playervar subHeaderNextHeroStr
+playervar showDescription
 
 
 #Subroutine names
@@ -86,7 +88,24 @@ rule "Disable bulit-in game mode & start timer variables {Game in progress GLOBA
     pauseMatchTime()
     timeCounter = 0.001
     #Creates a HUD in the top with [svr load: {0} | svr avg: {1} | svr peak: {2}]
-    hudSubheader([i for i in hostPlayer if "#Jokaes" == l"#{0}".format(hostPlayer)], "svr load: {0} | svr avg: {1} | svr peak: {2}".format(getServerLoad(), getAverageServerLoad(), getPeakServerLoad()), HudPosition.TOP, -100, Color.LIME_GREEN, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubheader([i for i in hostPlayer if "#Jokaes" == l"#{0}".format(hostPlayer)], "svr load: {0} | svr avg: {1} | svr peak: {2}".format(getServerLoad(), getAverageServerLoad(), getPeakServerLoad()), HudPosition.TOP, -100, Color.LIME_GREEN, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)    
+    workshopSettingsStr = ""
+    if(victoryCondition[0]):
+        workshopSettingsStr = "{0}{1}\n".format(workshopSettingsStr, "Victory @ {0}".format(victoryCondition[1]))
+    switch (heroListType):
+        default:
+        case 0:
+            workshopSettingsStr = "{0}{1}\n".format(workshopSettingsStr, "80% DPS, 10% SUPPORT, 10% TANKS")
+            break
+        case 1:
+            workshopSettingsStr = "{0}{1}\n".format(workshopSettingsStr, "50% DPS, 25% SUPPORT, 25% TANKS")
+            break
+        case 2:
+            workshopSettingsStr = "{0}{1}\n".format(workshopSettingsStr, "100% DPS")
+            break
+        case 3:
+            workshopSettingsStr = "{0}{1}\n".format(workshopSettingsStr, "ALL HEROES")
+            break
 
 rule "Workshop Settings":
     heroListType = createWorkshopSetting(enum["80% DPS, 10% SUPPORT, 10% TANKS", "50% DPS, 25% SUPPORT, 25% TANKS", "100% DPS", "ALL HEROES"], "Settings", "Hero List [80% DPS, 10% SUPPORT, 10% TANKS]", 0, 0)
@@ -354,24 +373,35 @@ rule "No entry OOB (spawn tele) -Created by Beemoo":
     
     eventPlayer.teleport(arenaMap2 + vect(random.randint(-8, 8), 0, random.randint(-19, 19)))
 
+rule "Toggle showDescription":
+    @Event eachPlayer
+    @Condition eventPlayer.isHoldingButton(Button.INTERACT)
 
-rule "Game Mode Description HUD - 1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v12.0.0":
+    wait(0.3, Wait.ABORT_WHEN_FALSE)
+    if(eventPlayer.showDescription == true):
+        eventPlayer.showDescription = false
+    else:
+        eventPlayer.showDescription = true
+
+rule "Game Mode Description HUD - 1000 DMG NEW HERO v13.0.0":
     @Condition isGameInProgress() == true
     
     hudSubtext(getAllPlayers(), " ", HudPosition.LEFT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), " ", HudPosition.LEFT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), " ", HudPosition.LEFT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), " ", HudPosition.LEFT, -1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext(getAllPlayers(), "1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v12.0.0", HudPosition.LEFT, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext(getAllPlayers(), "1000 DMG NEW HERO v13.0.0", HudPosition.LEFT, 0, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "Change {0} every {1}".format(l"Hero", l"{0} {1}".format(1000, l"Damage")), HudPosition.LEFT, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext(getAllPlayers(), "8 random DPS + 1 Tank (5th) + 1 Support (10th) in loop", HudPosition.LEFT, 2, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), " ", HudPosition.LEFT, 2.5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     hudSubtext(getAllPlayers(), "Created by Jokaes#2263", HudPosition.LEFT, 3, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
-    hudSubtext(getAllPlayers(), "Updated code & more in jokaes.github.io", HudPosition.LEFT, 4, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext(getAllPlayers(), "Join my discord.io/Jokaes", HudPosition.LEFT, 4, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext(getAllPlayers(), " ", HudPosition.LEFT, 5, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext([player for player in getAllPlayers() if player.showDescription == false], "Hold {0} to show the workshop settings".format(buttonString(Button.INTERACT)), HudPosition.LEFT, 6, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    hudSubtext([player for player in getAllPlayers() if player.showDescription == true], workshopSettingsStr, HudPosition.LEFT, 6, Color.ORANGE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
     async(gameModeDescriptionMessages, AsyncBehavior.NOOP)
 
 
-rule "Game Mode Description for players who join - 1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v12.0.0":
+rule "Game Mode Description for players who join - 1000 DMG NEW HERO v13.0.0":
     @Event playerJoined
     @Condition isGameInProgress() == true
     
@@ -379,14 +409,12 @@ rule "Game Mode Description for players who join - 1000 DMG = NEXT HERO aka ∞ 
 
 
 def gameModeDescriptionMessages():
-    @Name "Game Mode Description messages - 1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v12.0.0"
+    @Name "Game Mode Description messages - 1000 DMG NEW HERO v13.0.0"
     
     wait(3.5)
-    smallMessage(eventPlayer, "1000 DMG = NEXT HERO aka ∞ Infinite Damage Gun Game v12.0.0")
+    smallMessage(eventPlayer, "1000 DMG NEW HERO v13.0.0")
     wait(3.5)
     smallMessage(eventPlayer, "Change {0} every {1}".format(l"Hero", l"{0} {1}".format(1000, l"Damage")))
-    wait(3.5)
-    smallMessage(eventPlayer, "8 random DPS + 1 Tank (5th) + 1 Support (10th) in loop")
     wait(3.5)
     smallMessage(eventPlayer, "Created by Jokaes#2263")
 
