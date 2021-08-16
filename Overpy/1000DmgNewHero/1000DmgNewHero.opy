@@ -54,6 +54,7 @@ globalvar arenaMap2
 globalvar arenaMap3
 globalvar arenaMap4
 globalvar heroListType
+globalvar victoryCondition
 
 
 #Player variables
@@ -66,6 +67,7 @@ playervar damageDisplay
 playervar damageDisplayPos
 playervar damageDisplayScale
 playervar heroListInfinitoAppend
+playervar subHeaderNextHeroStr
 
 
 #Subroutine names
@@ -88,6 +90,9 @@ rule "Disable bulit-in game mode & start timer variables {Game in progress GLOBA
 
 rule "Workshop Settings":
     heroListType = createWorkshopSetting(enum["80% DPS, 10% SUPPORT, 10% TANKS", "50% DPS, 25% SUPPORT, 25% TANKS", "100% DPS", "ALL HEROES"], "Settings", "Hero List [80% DPS, 10% SUPPORT, 10% TANKS]", 0, 0)
+    victoryCondition = [null, null]
+    victoryCondition[0] = createWorkshopSetting(bool, "Settings", "Victory condition [OFF]", false, 0)
+    victoryCondition[1] = createWorkshopSetting(int[5000:20000], "Settings", "Victory necessary points [10000]", 10000, 0)
 
 rule "Gamemode description, create objective, next hero HUDs {Game in progress PLAYER}":
     @Event eachPlayer
@@ -96,7 +101,8 @@ rule "Gamemode description, create objective, next hero HUDs {Game in progress P
     async(gameModeDescriptionMessages, AsyncBehavior.NOOP)
     wait(4.5)
     setObjectiveDescription(eventPlayer, l"{0} {1} {2}".format(l"Deal", floor(eventPlayer.nextObjective - eventPlayer.damageDone), l"{0} -> {1}".format(l"Damage", heroIcon(eventPlayer.heroList[eventPlayer.nextObjective / 1000]))), HudReeval.VISIBILITY_AND_STRING)
-    hudSubheader(eventPlayer, l"{0}: {1}".format(l"Next Hero", l"{0} {1}".format(eventPlayer.nextObjective, eventPlayer.heroList[eventPlayer.nextObjective / 1000])), HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
+    eventPlayer.subHeaderNextHeroStr = l"{0}: {1}".format(l"Next Hero", l"{0} {1}".format(eventPlayer.nextObjective, eventPlayer.heroList[eventPlayer.nextObjective / 1000]))
+    hudSubheader(eventPlayer, eventPlayer.subHeaderNextHeroStr, HudPosition.TOP, 1, Color.WHITE, HudReeval.VISIBILITY_AND_STRING, SpecVisibility.DEFAULT)
 
 
 rule "Damage track":
@@ -104,6 +110,8 @@ rule "Damage track":
     @Condition victim != attacker
     
     eventPlayer.damageDone += eventDamage
+    if(victoryCondition[0] == false and eventPlayer.damageDone < victoryCondition[1]):
+        eventPlayer.subHeaderNextHeroStr = l"{0}: {1}".format(l"Next Hero", l"{0} {1}".format(eventPlayer.nextObjective, eventPlayer.heroList[eventPlayer.nextObjective / 1000]))
     #if eventPlayer.getScore() >= 9999:
     #        goto lbl_0
     #Updates the score only if is necesary
@@ -131,6 +139,21 @@ rule "Leaderboard 12.0.0":
     @Event eachPlayer
     
     hudSubtext(getAllPlayers(), "{0} : {1} : {2}".format(heroIcon(eventPlayer.getCurrentHero()), eventPlayer, round(eventPlayer.damageDone)), HudPosition.RIGHT, eventPlayer.damageDone * -1 / 1000, Color.WHITE, HudReeval.VISIBILITY_SORT_ORDER_AND_STRING, SpecVisibility.ALWAYS)
+
+rule "Pre-Victory":
+    @Event eachPlayer
+    @Condition victoryCondition[0] == true
+    @Condition eventPlayer.nextObjective >= victoryCondition[1]
+
+    setObjectiveDescription(eventPlayer, l"{0} {1} {2}".format(l"Deal", floor(eventPlayer.nextObjective - eventPlayer.damageDone), l"{0} -> {1}".format(l"Damage", "WIN")), HudReeval.VISIBILITY_AND_STRING)
+    eventPlayer.subHeaderNextHeroStr = l"{0}: {1}".format(l"Victory", l"{0} {1}".format(eventPlayer.nextObjective, ""))
+
+rule "Victory":
+    @Event eachPlayer
+    @Condition victoryCondition[0] == true
+    @Condition eventPlayer.damageDone >= victoryCondition[1]
+
+    declarePlayerVictory(eventPlayer)
 
 rule "80% DPS, 10% SUPPORT, 10% TANKS":
     @Event eachPlayer
